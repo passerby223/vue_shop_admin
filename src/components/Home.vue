@@ -13,47 +13,84 @@
     <!--      主体区域-->
     <el-container>
       <!--        左侧边栏区域-->
-      <el-aside width="200px">
+      <el-aside :width="isCollapse ? '64px' : '200px'">
+        <!--        显示/隐藏菜单栏按钮-->
+        <div class="toggle-button" @click="toggleCollapse">
+          |||
+        </div>
         <!--        侧边栏菜单区域-->
         <el-menu
           background-color="#333744"
           text-color="#fff"
-          active-text-color="#ffd04b">
+          active-text-color="#409BFF"
+          :unique-opened="true"
+          :collapse="isCollapse"
+          :collapse-transition="false"
+          router>
           <!--          一级菜单-->
-          <el-submenu index="1">
+          <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
             <!--            一级菜单的模板区域-->
             <template slot="title">
               <!--              图标-->
-              <i class="el-icon-location"></i>
+              <i :class="iconsObj[item.id]"></i>
               <!--              文本-->
-              <span>导航一</span>
+              <span>{{ item.authName }}</span>
             </template>
-            <el-menu-item index="1-4-1">
+            <!--            二级菜单-->
+            <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id">
               <!--            二级菜单的模板区域-->
               <template slot="title">
                 <!--              图标-->
-                <i class="el-icon-location"></i>
+                <i class="el-icon-menu"></i>
                 <!--              文本-->
-                <span>导航一</span>
+                <span>{{ subItem.authName }}</span>
               </template>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
       <!--        右主体区域-->
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
 export default {
+  data () {
+    return {
+      // 左侧菜单数据
+      menuList: [],
+      iconsObj: {
+        125: 'iconfont icon-user',
+        103: 'iconfont icon-tijikongjian',
+        101: 'iconfont icon-shangpin',
+        102: 'iconfont icon-danju',
+        145: 'iconfont icon-baobiao'
+      },
+      isCollapse: false
+    }
+  },
+  created () {
+    this.getMenuList()
+  },
   methods: {
     logout () {
       // 清空token
       window.sessionStorage.clear()
       // 强制重定向到登录页面
       this.$router.push('/login')
+    },
+    async getMenuList () {
+      const { data: res } = await this.$http.get('menus')
+      // console.log(res)
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.menuList = res.data
+    },
+    toggleCollapse () {
+      this.isCollapse = !this.isCollapse
     }
   }
 }
@@ -81,6 +118,10 @@ export default {
 
 .el-aside {
   background-color: #333744;
+
+  .el-menu {
+    border-right: none;
+  }
 }
 
 .el-main {
@@ -89,5 +130,19 @@ export default {
 
 .home-container {
   height: 100%;
+}
+
+.iconfont {
+  margin-right: 10px;
+}
+
+.toggle-button {
+  background-color: #4A5064;
+  font-size: 10px;
+  line-height: 24px;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.3em;
+  cursor: pointer;
 }
 </style>
