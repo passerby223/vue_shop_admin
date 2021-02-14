@@ -26,7 +26,8 @@
           :unique-opened="true"
           :collapse="isCollapse"
           :collapse-transition="false"
-          router>
+          router
+          :default-active="navActivePath">
           <!--          一级菜单-->
           <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
             <!--            一级菜单的模板区域-->
@@ -37,7 +38,8 @@
               <span>{{ item.authName }}</span>
             </template>
             <!--            二级菜单-->
-            <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id">
+            <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id"
+                          @click="saveNavState('/' + subItem.path)">
               <!--            二级菜单的模板区域-->
               <template slot="title">
                 <!--              图标-->
@@ -63,6 +65,7 @@ export default {
     return {
       // 左侧菜单数据
       menuList: [],
+      // 图标对象
       iconsObj: {
         125: 'iconfont icon-user',
         103: 'iconfont icon-tijikongjian',
@@ -70,27 +73,39 @@ export default {
         102: 'iconfont icon-danju',
         145: 'iconfont icon-baobiao'
       },
-      isCollapse: false
+      // 是否显示/折叠左侧菜单栏
+      isCollapse: false,
+      navActivePath: ''
     }
   },
+  // Vue的生命周期函数
   created () {
     this.getMenuList()
+    this.navActivePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
+    // 退出
     logout () {
       // 清空token
       window.sessionStorage.clear()
       // 强制重定向到登录页面
       this.$router.push('/login')
     },
+    // 获取作业侧边栏菜单的数据
     async getMenuList () {
       const { data: res } = await this.$http.get('menus')
       // console.log(res)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.menuList = res.data
     },
+    // 切换左侧菜单栏的显示与折叠
     toggleCollapse () {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存左侧菜单项的激活状态
+    saveNavState (activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.navActivePath = activePath
     }
   }
 }
