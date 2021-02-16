@@ -49,7 +49,6 @@ Vue.use(Switch)
 Vue.use(Tooltip)
 Vue.use(Pagination)
 Vue.use(Dialog)
-Vue.use(MessageBox)
 // 把element-ui中的Message消息组件，挂载到Vue的原型对象上
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
